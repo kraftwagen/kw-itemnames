@@ -1,0 +1,61 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function kw_aliases_schema() {
+  $schema = array();
+  
+  $schema['kw_aliases'] = array(
+    'description' => 'Stores the aliases that are assigned to kw_aliases managed items',
+    'fields' => array(
+      'type' => array(
+        'description' => 'The type of item for which we registered the alias',
+        'type' => 'varchar',
+        'length' => 32,
+        'default' => '',
+        'not null' => TRUE,
+      ),
+      'alias' => array(
+        'description' => 'The alias that is assigned to the item',
+        'type' => 'varchar',
+        'length' => 64, // 64 ought to be enough for everybody
+        'default' => '',
+        'not null' => TRUE
+      ),
+      'item_id' => array(
+        'description' => 'The internal ID of the item this alias points to',
+        'type' => 'int', // this is not intended for items that already have a unique string ID
+        'default' => 0,
+        'not null' => TRUE,
+      ),
+    ),
+    'unique keys' => array(
+      'item' => array('type', 'item_id'), // you can't assign two aliases to one item
+    ),
+    'primary key' => array('type', 'alias'), // you can't assign an alias to two items of the same type
+  );
+
+  $schema['kw_aliases_deletion_prevention'] = array(
+    'description' => 'Stores the identifiers for aliased items, that shouldn\'d be removed',
+
+    'fields' => array(
+      'type' => array(
+        'description' => 'The type of item for which we want to prevent deletion',
+        'type' => 'varchar',
+        'length' => 32,
+        'default' => '',
+        'not null' => TRUE,
+      ),
+      'item_id' => array(
+        'description' => 'The internal ID of the item that should\'d be removed',
+        'type' => 'int', 
+        'default' => 0,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('type', 'item_id'),
+  );
+  
+  return $schema;
+}

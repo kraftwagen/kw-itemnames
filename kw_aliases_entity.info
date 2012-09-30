@@ -1,0 +1,8 @@
+name = Kraftwagen Aliases Entity
+description = Provides Kraftwagen Aliases item types for entities
+package = Kraftwagen
+
+core = 7.x
+
+dependencies[] = kw_aliases
+dependencies[] = entity

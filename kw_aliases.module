@@ -1,0 +1,158 @@
+<?php
+
+/**
+ * Implements hook_hook_info().
+ */
+function kw_aliases_hook_info() {
+  return array(
+    'kw_aliases_type_info' => array('group' => 'kw_aliases'),
+  );
+}
+
+/**
+ * Load the information about how to handle aliasable types.
+ *
+ * @param $type
+ *   Optional type for which the information should be loaded.
+ * 
+ * @return
+ *   The information about handling aliasable types. If $type is not given, this
+ *   will be an associative array, with types as keys and the information per 
+ *   type as values. If $type is given, the value for that type is returned, 
+ *   which is also an associative array.
+ */
+function kw_aliases_type_info($type = NULL) {
+  $type_info = &drupal_static(__FUNCTION__);
+
+  // if not statically cached yet
+  if (!isset($type_info)) {  
+    // first try to get from the cache
+    if ($cache = cache_get(__FUNCTION__)) {
+      $type_info = $cache->data;
+    } 
+  }
+
+  if (!isset($type_info)) {
+    // construct the list of types from the hook implementations
+    $type_info = array();
+    $modules = module_implements(__FUNCTION__);
+    foreach ($modules as $module) {
+      if ($result = module_invoke($module, __FUNCTION__)) {
+        foreach ($result as $rtype => $rinfo) {
+          $type_info[$rtype] = $rinfo + array('type' => $rtype, 'module' => $module);
+        }
+      }
+    }
+    drupal_alter(__FUNCTION__, $type_info);
+
+    // save the list to the cache
+    cache_set(__FUNCTION__, $type_info);
+  }
+
+  // if type given, return only type specific information
+  if ($type) {
+    return !empty($type_info[$type]) ? $type_info[$type] : FALSE;
+  } 
+
+  return $type_info;
+}
+
+/**
+ * Ensure that an item exists with a certain alias. 
+ * 
+ * @param $type
+ *   The type of alias that should be ensured.
+ * @param $alias
+ *   The alias that the item should have. This alias has no other use than 
+ *   uniquely identifying the item. Therefore you should make sure that the
+ *   alias is used only once per type in your project. A good strategy is to
+ *   prefix all the aliases you use with your module name.
+ * @param $required
+ *   The properties of the item that are required. If the item already 
+ *   exists, it will be updated to have these properties set correctly. 
+ * @param $defaults
+ *   The properties of the item that should be set on initial creation, but 
+ *   should not be enforced.
+ * @param $prevent_deletion
+ *   Whether or not deletion prevention should be enabled on this item. If it is
+ *   enabled, Kraftwagen tries to prevent users from deleting it, and will 
+ *   recreate the item when the user somehow deleted it anyway. If it is 
+ *   deletable, Kraftwagen will not try to recreate the item, when it finds out
+ *   that the item has been created, but a user deleted it.
+ * 
+ * @return 
+ *   The item, after optionally updating it. This function can return FALSE, if
+ *   deletion prevention is switched off!
+ */
+function kw_aliases_ensure($type, $alias, $required = NULL, $defaults = NULL, $prevent_deletion = TRUE) {
+  // make sure all our helper functions exist
+  module_load_include('inc', 'kw_aliases');
+
+  // check if we have an item id registered
+  if ($item_id = kw_aliases_alias_get_item_id($type, $alias)) {
+    // try to load the item
+    $item = kw_aliases_item_load($type, $item_id);
+    if ($item) {
+      // remove, maybe existing deletion prevention, so the item won't be 
+      // protected anymore, when we get a new item_id. This sometimes can 
+      // happen. For example, files get a new file_id when the a new source file
+      // is used.
+      kw_aliases_item_allow_deletion($type, $item);
+
+      // update the item we loaded, using the required properties
+      $item = kw_aliases_item_update($type, $item, $required);
+      if ($prevent_deletion) {
+        kw_aliases_item_prevent_deletion($type, $item);
+      } 
+      // make sure the alias points to the new item
+      kw_aliases_alias_update($type, $alias, $item);
+
+      return $item;
+    }
+
+    // if we get here, the item has been created before, but has been deleted.
+    // if deletion prevention is disabled, we jump out here, because we don't
+    // need to recreate it. We return FALSE to inform the caller the item is not
+    // created.
+    if (!$prevent_deletion) {
+      return FALSE;
+    }
+  }
+
+  // create the item, using the required and default properties
+  $item = kw_aliases_item_create($type, $required, $defaults);
+  if ($prevent_deletion) {
+    kw_aliases_item_prevent_deletion($type, $item);
+  }
+  // make sure the alias points to the new item
+  kw_aliases_alias_update($type, $alias, $item);
+
+  return $item;
+}
+
+/**
+ * Load an aliased item. 
+ *
+ * Never assume in the code that uses this function that a valid item will be
+ * returned. Not even the item was ensured (using kw_aliases_ensure) with
+ * deletion prevention. We can't prevent deletion completely, so your code 
+ * should not break miserably when the item can't be found.
+ *
+ * @param $type
+ *   The type of alias to load
+ * @param $alias
+ *   The alias to load
+
+ * @return
+ *   The loaded item, or if not found FALSE.
+ */
+function kw_aliases_load($type, $alias) {
+  // make sure all our helper functions exist
+  module_load_include('inc', 'kw_aliases');
+
+  if (!($item_id = kw_aliases_alias_get_item_id($type, $alias))) {
+    return FALSE;
+  }
+  
+  return kw_aliases_item_load($type, $item_id);
+}
