@@ -133,35 +133,6 @@ function kw_aliases_alias_set_item_id($type, $alias, $item_id) {
 }
 
 /**
- * Enable deletion prevention on an item.
- *
- * @param $type
- *   The type of item.
- * @param $item
- *   The item.
- */
-function kw_aliases_item_prevent_deletion($type, $item) {
-  db_merge('kw_aliases_deletion_prevention')
-    ->key(array('type' => $type, 'item_id' => kw_aliases_item_get_item_id($type, $item)))
-    ->execute();
-}
-
-/**
- * Disable deletion prevention on an item.
- *
- * @param $type
- *   The type of item.
- * @param $item
- *   The item.
- */
-function kw_aliases_item_allow_deletion($type, $item) {
-  $item_id = kw_aliases_item_get_item_id($type, $item);
-  db_delete('kw_aliases_deletion_prevention')
-    ->condition('type', $type)->condition('item_id', $item_id)
-    ->execute();
-}
-
-/**
  * Call a callback for an alias type.
  *
  * @param $type

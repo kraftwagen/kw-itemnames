@@ -84,7 +84,7 @@ function kw_aliases_type_info($type = NULL) {
  *   The item, after optionally updating it. This function can return FALSE, if
  *   deletion prevention is switched off!
  */
-function kw_aliases_ensure($type, $alias, $required = NULL, $defaults = NULL, $prevent_deletion = TRUE) {
+function kw_aliases_ensure($type, $alias, $required = NULL, $defaults = NULL) {
   // make sure all our helper functions exist
   module_load_include('inc', 'kw_aliases');
 
@@ -93,37 +93,17 @@ function kw_aliases_ensure($type, $alias, $required = NULL, $defaults = NULL, $p
     // try to load the item
     $item = kw_aliases_item_load($type, $item_id);
     if ($item) {
-      // remove, maybe existing deletion prevention, so the item won't be 
-      // protected anymore, when we get a new item_id. This sometimes can 
-      // happen. For example, files get a new file_id when the a new source file
-      // is used.
-      kw_aliases_item_allow_deletion($type, $item);
-
       // update the item we loaded, using the required properties
       $item = kw_aliases_item_update($type, $item, $required);
-      if ($prevent_deletion) {
-        kw_aliases_item_prevent_deletion($type, $item);
-      } 
       // make sure the alias points to the new item
       kw_aliases_alias_update($type, $alias, $item);
 
       return $item;
     }
-
-    // if we get here, the item has been created before, but has been deleted.
-    // if deletion prevention is disabled, we jump out here, because we don't
-    // need to recreate it. We return FALSE to inform the caller the item is not
-    // created.
-    if (!$prevent_deletion) {
-      return FALSE;
-    }
   }
 
   // create the item, using the required and default properties
   $item = kw_aliases_item_create($type, $required, $defaults);
-  if ($prevent_deletion) {
-    kw_aliases_item_prevent_deletion($type, $item);
-  }
   // make sure the alias points to the new item
   kw_aliases_alias_update($type, $alias, $item);
 

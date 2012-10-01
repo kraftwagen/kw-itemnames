@@ -35,27 +35,6 @@ function kw_aliases_schema() {
     ),
     'primary key' => array('type', 'alias'), // you can't assign an alias to two items of the same type
   );
-
-  $schema['kw_aliases_deletion_prevention'] = array(
-    'description' => 'Stores the identifiers for aliased items, that shouldn\'d be removed',
-
-    'fields' => array(
-      'type' => array(
-        'description' => 'The type of item for which we want to prevent deletion',
-        'type' => 'varchar',
-        'length' => 32,
-        'default' => '',
-        'not null' => TRUE,
-      ),
-      'item_id' => array(
-        'description' => 'The internal ID of the item that should\'d be removed',
-        'type' => 'int', 
-        'default' => 0,
-        'not null' => TRUE,
-      ),
-    ),
-    'primary key' => array('type', 'item_id'),
-  );
   
   return $schema;
 }
