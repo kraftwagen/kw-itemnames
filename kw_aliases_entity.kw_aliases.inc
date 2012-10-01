@@ -21,6 +21,9 @@ function kw_aliases_entity_kw_aliases_type_info() {
       'item update callback' => 'kw_aliases_entity_item_update',
       'item update arguments' => array($entity_type, '%item', '%required'),
 
+      'item delete callback' => 'kw_aliases_entity_item_delete',
+      'item delete arguments' => array($entity_type, '%item_id'),
+
       'item extract id callback' => 'kw_aliases_entity_item_extract_id',
       'item extract id arguments' => array($entity_type, '%item'),
     );
@@ -61,6 +64,10 @@ function kw_aliases_entity_item_update($entity_type, $entity, $required) {
   }
   entity_save($entity_type, $entity);
   return $entity;
+}
+
+function kw_aliases_entity_item_delete($entity_type, $entity_id) {
+  entity_delete($entity_type, $entity_id);
 }
 
 function kw_aliases_entity_item_extract_id($entity_type, $entity) {

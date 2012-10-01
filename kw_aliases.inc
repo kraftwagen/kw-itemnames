@@ -38,7 +38,7 @@ function kw_aliases_item_create($type, $defaults = array(), $required = array())
 }
 
 /**
- * Update a aliased item.
+ * Update an aliased item.
 
  * @param $type
  *   The type of item that should be updated.
@@ -54,6 +54,25 @@ function kw_aliases_item_create($type, $defaults = array(), $required = array())
 function kw_aliases_item_update($type, $item, $required = array()) {
   return kw_aliases_type_call_callback($type, 'item update', 
     array('%item', '%required'), array('%item' => $item, '%required' => $required)
+  );
+}
+
+/**
+ * Deleted an aliased item.
+ *
+ * @param $type
+ *   The type of item that should be deleted.
+ * @param $item_id
+ *   The ID of the item that should be deleted.
+ * 
+ * @return 
+ *   TRUE on success, FALSE on failure. Failure doesn't mean something went 
+ *   wrong. It just means the item could not be deleted, which also can mean
+ *   that the item is already gone.
+ */
+function kw_aliases_item_delete($type, $item_id) {
+  return kw_aliases_type_call_callback($type, 'item delete',
+    array('%item_id'), array('%item_id' => $item_id)
   );
 }
 
@@ -128,6 +147,14 @@ function kw_aliases_alias_set_item_id($type, $alias, $item_id) {
   db_merge('kw_aliases')
     ->key(array('type' => $type, 'alias' => $alias))
     ->fields(array('item_id' => $item_id))
+    ->execute();
+  return TRUE;
+}
+
+function kw_aliases_alias_delete($type, $alias) {
+  db_delete('kw_aliases')
+    ->condition('type', $type)
+    ->condition('alias', $alias)
     ->execute();
   return TRUE;
 }
