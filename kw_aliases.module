@@ -163,3 +163,10 @@ function kw_aliases_load($type, $alias) {
   
   return kw_aliases_item_load($type, $item_id);
 }
+
+function kw_aliases_item_id($type, $alias) {
+  // make sure all our helper functions exist
+  module_load_include('inc', 'kw_aliases');
+
+  return kw_aliases_alias_get_item_id($type, $alias);
+}
