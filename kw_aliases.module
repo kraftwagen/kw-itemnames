@@ -73,13 +73,7 @@ function kw_aliases_type_info($type = NULL) {
  * @param $defaults
  *   The properties of the item that should be set on initial creation, but 
  *   should not be enforced.
- * @param $prevent_deletion
- *   Whether or not deletion prevention should be enabled on this item. If it is
- *   enabled, Kraftwagen tries to prevent users from deleting it, and will 
- *   recreate the item when the user somehow deleted it anyway. If it is 
- *   deletable, Kraftwagen will not try to recreate the item, when it finds out
- *   that the item has been created, but a user deleted it.
- * 
+ *
  * @return 
  *   The item, after optionally updating it. This function can return FALSE, if
  *   deletion prevention is switched off!
