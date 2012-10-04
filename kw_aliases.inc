@@ -125,12 +125,10 @@ function kw_aliases_alias_update($type, $alias, $item) {
  *   The id of the item, or if not found FALSE.
  */
 function kw_aliases_alias_get_item_id($type, $alias) {
-  $result = db_select('kw_aliases', 'ka')
-    ->fields('ka', array('item_id'))
-    ->condition('type', $type)->condition('alias', $alias)
-    ->execute()
-    ->fetchField();
-  return $result ? $result : FALSE;
+  if (isset($type) && isset($alias)) {
+    return kw_aliases_mapping($type, $alias);
+  }
+  return FALSE;
 }
 
 /**
@@ -143,12 +141,50 @@ function kw_aliases_alias_get_item_id($type, $alias) {
  * @param $item_id
  *   The id to set
  */
-function kw_aliases_alias_set_item_id($type, $alias, $item_id) {
+function kw_aliases_alias_set_item_id($type, $alias, $item_id = null) {
   db_merge('kw_aliases')
     ->key(array('type' => $type, 'alias' => $alias))
     ->fields(array('item_id' => $item_id))
     ->execute();
+  kw_aliases_mapping(null, null, true); // drops and rebuilds the alias cache
   return TRUE;
+}
+
+function kw_aliases_mapping($type = null, $alias = null, $reset = false) {
+  $mapping = &drupal_static('kw_aliases');
+
+  if ($reset) {
+    $mapping = null;
+  }
+
+  if (!isset($mapping)) {
+    if (!$reset && ($cache = cache_get('kw_aliases')) {
+      $mapping = $cache->data;
+    }
+  }
+
+  if (!isset($mapping)) {
+    $mapping = array();
+    $result = db_select('kw_aliases', 'ka')
+      ->fields('ka', array('item_id', 'type', 'alias'))
+      ->execute();
+    foreach ($result as $row) {
+      if (!array_key_exists($row->type, $mapping)) {
+        $mapping[$row->type] = array();
+      }
+      $mapping[$row->type][$row->alias] = $row->item_id;
+    }
+
+    cache_set('kw_aliases', $mapping);
+  }
+
+  if (isset($type) && isset($alias)) {
+    return isset($mapping[$type][$alias]) ? $mapping[$type][$alias] : FALSE;
+  }
+  if (isset($type)) {
+    return isset($mapping[$type]) ? $mapping[$type] : FALSE;
+  }
+  return $mapping;
 }
 
 function kw_aliases_alias_delete($type, $alias) {
@@ -156,6 +192,7 @@ function kw_aliases_alias_delete($type, $alias) {
     ->condition('type', $type)
     ->condition('alias', $alias)
     ->execute();
+  kw_aliases_mapping(null, null, true); // drops and rebuilds the alias cache
   return TRUE;
 }
 
