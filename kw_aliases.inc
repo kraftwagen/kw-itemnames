@@ -158,7 +158,7 @@ function kw_aliases_mapping($type = null, $alias = null, $reset = false) {
   }
 
   if (!isset($mapping)) {
-    if (!$reset && ($cache = cache_get('kw_aliases')) {
+    if (!$reset && ($cache = cache_get('kw_aliases'))) {
       $mapping = $cache->data;
     }
   }

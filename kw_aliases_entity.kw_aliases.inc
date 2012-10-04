@@ -38,7 +38,6 @@ function kw_aliases_entity_item_load($entity_type, $entity_id) {
 }
 
 function kw_aliases_entity_item_create($entity_type, $defaults, $required) {
-  dsm(func_get_args());
   $entity_array = $required + $defaults;
   $info = entity_get_info($entity_type);
 
