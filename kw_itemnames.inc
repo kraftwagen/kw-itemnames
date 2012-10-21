@@ -11,8 +11,8 @@
  * @return
  *   The loaded item, or if not found FALSE.
  */
-function kw_aliases_item_load($type, $item_id) {
-  return kw_aliases_type_call_callback($type, 'item load',
+function kw_itemnames_item_load($type, $item_id) {
+  return kw_itemnames_type_call_callback($type, 'item load',
     array('%item_id'), array('%item_id' => $item_id)
   );
 }
@@ -31,8 +31,8 @@ function kw_aliases_item_load($type, $item_id) {
  * @return
  *   The created item.
  */
-function kw_aliases_item_create($type, $defaults = array(), $required = array()) {
-  return kw_aliases_type_call_callback($type, 'item create',
+function kw_itemnames_item_create($type, $defaults = array(), $required = array()) {
+  return kw_itemnames_type_call_callback($type, 'item create',
     array('%defaults', '%required'), array('%defaults' => $defaults, '%required' => $required)
   );
 }
@@ -51,8 +51,8 @@ function kw_aliases_item_create($type, $defaults = array(), $required = array())
  * @return
  *   The created item.
  */
-function kw_aliases_item_update($type, $item, $required = array()) {
-  return kw_aliases_type_call_callback($type, 'item update', 
+function kw_itemnames_item_update($type, $item, $required = array()) {
+  return kw_itemnames_type_call_callback($type, 'item update', 
     array('%item', '%required'), array('%item' => $item, '%required' => $required)
   );
 }
@@ -70,8 +70,8 @@ function kw_aliases_item_update($type, $item, $required = array()) {
  *   wrong. It just means the item could not be deleted, which also can mean
  *   that the item is already gone.
  */
-function kw_aliases_item_delete($type, $item_id) {
-  return kw_aliases_type_call_callback($type, 'item delete',
+function kw_itemnames_item_delete($type, $item_id) {
+  return kw_itemnames_type_call_callback($type, 'item delete',
     array('%item_id'), array('%item_id' => $item_id)
   );
 }
@@ -87,8 +87,8 @@ function kw_aliases_item_delete($type, $item_id) {
  * @return
  *   The ID of the item.
  */
-function kw_aliases_item_get_item_id($type, $item) {
-  return kw_aliases_type_call_callback($type, 'item extract id', 
+function kw_itemnames_item_get_item_id($type, $item) {
+  return kw_itemnames_type_call_callback($type, 'item extract id', 
     array('%item'), array('%item' => $item)
   );
 }
@@ -106,11 +106,11 @@ function kw_aliases_item_get_item_id($type, $item) {
  * @return
  *   TRUE if successfull. FALSE on error.
  */
-function kw_aliases_alias_update($type, $alias, $item) {
-  if (!($item_id = kw_aliases_item_get_item_id($type, $item))) {
+function kw_itemnames_alias_update($type, $alias, $item) {
+  if (!($item_id = kw_itemnames_item_get_item_id($type, $item))) {
     return FALSE;
   }
-  return kw_aliases_alias_set_item_id($type, $alias, $item_id);
+  return kw_itemnames_alias_set_item_id($type, $alias, $item_id);
 }
 
 /**
@@ -124,9 +124,9 @@ function kw_aliases_alias_update($type, $alias, $item) {
  * @return
  *   The id of the item, or if not found FALSE.
  */
-function kw_aliases_alias_get_item_id($type, $alias) {
+function kw_itemnames_alias_get_item_id($type, $alias) {
   if (isset($type) && isset($alias)) {
-    return kw_aliases_mapping($type, $alias);
+    return kw_itemnames_mapping($type, $alias);
   }
   return FALSE;
 }
@@ -141,31 +141,31 @@ function kw_aliases_alias_get_item_id($type, $alias) {
  * @param $item_id
  *   The id to set
  */
-function kw_aliases_alias_set_item_id($type, $alias, $item_id = null) {
-  db_merge('kw_aliases')
+function kw_itemnames_alias_set_item_id($type, $alias, $item_id = null) {
+  db_merge('kw_itemnames')
     ->key(array('type' => $type, 'alias' => $alias))
     ->fields(array('item_id' => $item_id))
     ->execute();
-  kw_aliases_mapping(null, null, true); // drops and rebuilds the alias cache
+  kw_itemnames_mapping(null, null, true); // drops and rebuilds the alias cache
   return TRUE;
 }
 
-function kw_aliases_mapping($type = null, $alias = null, $reset = false) {
-  $mapping = &drupal_static('kw_aliases');
+function kw_itemnames_mapping($type = null, $alias = null, $reset = false) {
+  $mapping = &drupal_static('kw_itemnames');
 
   if ($reset) {
     $mapping = null;
   }
 
   if (!isset($mapping)) {
-    if (!$reset && ($cache = cache_get('kw_aliases'))) {
+    if (!$reset && ($cache = cache_get('kw_itemnames'))) {
       $mapping = $cache->data;
     }
   }
 
   if (!isset($mapping)) {
     $mapping = array();
-    $result = db_select('kw_aliases', 'ka')
+    $result = db_select('kw_itemnames', 'ka')
       ->fields('ka', array('item_id', 'type', 'alias'))
       ->execute();
     foreach ($result as $row) {
@@ -175,7 +175,7 @@ function kw_aliases_mapping($type = null, $alias = null, $reset = false) {
       $mapping[$row->type][$row->alias] = $row->item_id;
     }
 
-    cache_set('kw_aliases', $mapping);
+    cache_set('kw_itemnames', $mapping);
   }
 
   if (isset($type) && isset($alias)) {
@@ -187,12 +187,12 @@ function kw_aliases_mapping($type = null, $alias = null, $reset = false) {
   return $mapping;
 }
 
-function kw_aliases_alias_delete($type, $alias) {
-  db_delete('kw_aliases')
+function kw_itemnames_alias_delete($type, $alias) {
+  db_delete('kw_itemnames')
     ->condition('type', $type)
     ->condition('alias', $alias)
     ->execute();
-  kw_aliases_mapping(null, null, true); // drops and rebuilds the alias cache
+  kw_itemnames_mapping(null, null, true); // drops and rebuilds the alias cache
   return TRUE;
 }
 
@@ -213,8 +213,8 @@ function kw_aliases_alias_delete($type, $alias) {
  * @return
  *   The return value of the callback. FALSE if the callback can't be called.
  */
-function kw_aliases_type_call_callback($type, $callback_type, $args = array(), $replace = array()) {
-  $info = kw_aliases_type_info($type);
+function kw_itemnames_type_call_callback($type, $callback_type, $args = array(), $replace = array()) {
+  $info = kw_itemnames_type_info($type);
 
   $callback_key = $callback_type . ' callback';
   if (!$info || !isset($info[$callback_key])) {
@@ -222,7 +222,7 @@ function kw_aliases_type_call_callback($type, $callback_type, $args = array(), $
   }
 
   // load required files
-  module_load_include('kw_aliases.inc', $info['module']);
+  module_load_include('kw_itemnames.inc', $info['module']);
   if (isset($info['file'])) {
     $path = isset($info['file path']) ? $info['file path'] : drupal_get_path('module', $info['module']);
     $filepath = $path . DIRECTORY_SEPARATOR . $info['file'];
@@ -242,17 +242,17 @@ function kw_aliases_type_call_callback($type, $callback_type, $args = array(), $
   }
 
   if (!empty($replace)) {
-    $args = _kw_aliases_replace_arguments($args, $replace);
+    $args = _kw_itemnames_replace_arguments($args, $replace);
   }
 
   return call_user_func_array($info[$callback_key], $args);
 }
 
-function _kw_aliases_replace_arguments($args, $replace = array()) {
+function _kw_itemnames_replace_arguments($args, $replace = array()) {
   $result = array();
   foreach ($args as $key => $arg) {
     if (is_array($arg)) {
-      $result[$key] = _kw_aliases_replace_arguments($arg, $replace);
+      $result[$key] = _kw_itemnames_replace_arguments($arg, $replace);
     } elseif (is_scalar($arg) && array_key_exists($arg, $replace)) {
       $result[$key] = $replace[$arg];
     } else {

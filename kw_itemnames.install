@@ -3,11 +3,11 @@
 /**
  * Implements hook_schema().
  */
-function kw_aliases_schema() {
+function kw_itemnames_schema() {
   $schema = array();
   
-  $schema['kw_aliases'] = array(
-    'description' => 'Stores the aliases that are assigned to kw_aliases managed items',
+  $schema['kw_itemnames'] = array(
+    'description' => 'Stores the aliases that are assigned to kw_itemnames managed items',
     'fields' => array(
       'type' => array(
         'description' => 'The type of item for which we registered the alias',

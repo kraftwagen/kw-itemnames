@@ -3,9 +3,9 @@
 /**
  * Implements hook_hook_info().
  */
-function kw_aliases_hook_info() {
+function kw_itemnames_hook_info() {
   return array(
-    'kw_aliases_type_info' => array('group' => 'kw_aliases'),
+    'kw_itemnames_type_info' => array('group' => 'kw_itemnames'),
   );
 }
 
@@ -21,7 +21,7 @@ function kw_aliases_hook_info() {
  *   type as values. If $type is given, the value for that type is returned, 
  *   which is also an associative array.
  */
-function kw_aliases_type_info($type = NULL) {
+function kw_itemnames_type_info($type = NULL) {
   $type_info = &drupal_static(__FUNCTION__);
 
   // if not statically cached yet
@@ -78,28 +78,28 @@ function kw_aliases_type_info($type = NULL) {
  *   The item, after optionally updating it. This function can return FALSE, if
  *   deletion prevention is switched off!
  */
-function kw_aliases_ensure($type, $alias, $required = NULL, $defaults = NULL) {
+function kw_itemnames_ensure($type, $alias, $required = NULL, $defaults = NULL) {
   // make sure all our helper functions exist
-  module_load_include('inc', 'kw_aliases');
+  module_load_include('inc', 'kw_itemnames');
 
   // check if we have an item id registered
-  if ($item_id = kw_aliases_alias_get_item_id($type, $alias)) {
+  if ($item_id = kw_itemnames_alias_get_item_id($type, $alias)) {
     // try to load the item
-    $item = kw_aliases_item_load($type, $item_id);
+    $item = kw_itemnames_item_load($type, $item_id);
     if ($item) {
       // update the item we loaded, using the required properties
-      $item = kw_aliases_item_update($type, $item, $required);
+      $item = kw_itemnames_item_update($type, $item, $required);
       // make sure the alias points to the new item
-      kw_aliases_alias_update($type, $alias, $item);
+      kw_itemnames_alias_update($type, $alias, $item);
 
       return $item;
     }
   }
 
   // create the item, using the required and default properties
-  $item = kw_aliases_item_create($type, $required, $defaults);
+  $item = kw_itemnames_item_create($type, $required, $defaults);
   // make sure the alias points to the new item
-  kw_aliases_alias_update($type, $alias, $item);
+  kw_itemnames_alias_update($type, $alias, $item);
 
   return $item;
 }
@@ -115,16 +115,16 @@ function kw_aliases_ensure($type, $alias, $required = NULL, $defaults = NULL) {
  * @return
  *   TRUE on success, FALSE on failure. Also TRUE if the item is already gone.
  */
-function kw_aliases_remove($type, $alias) {
+function kw_itemnames_remove($type, $alias) {
   // make sure all our helper functions exist
-  module_load_include('inc', 'kw_aliases');
+  module_load_include('inc', 'kw_itemnames');
 
-  if ($item_id = kw_aliases_alias_get_item_id($type, $alias)) {
-    kw_aliases_alias_delete($type, $alias);
+  if ($item_id = kw_itemnames_alias_get_item_id($type, $alias)) {
+    kw_itemnames_alias_delete($type, $alias);
 
-    $item = kw_aliases_item_load($type, $item_id);
+    $item = kw_itemnames_item_load($type, $item_id);
     if ($item) {
-      return kw_aliases_item_delete($type, $item_id);
+      return kw_itemnames_item_delete($type, $item_id);
     }
   }
 
@@ -135,7 +135,7 @@ function kw_aliases_remove($type, $alias) {
  * Load an aliased item. 
  *
  * Never assume in the code that uses this function that a valid item will be
- * returned. Not even the item was ensured (using kw_aliases_ensure) with
+ * returned. Not even the item was ensured (using kw_itemnames_ensure) with
  * deletion prevention. We can't prevent deletion completely, so your code 
  * should not break miserably when the item can't be found.
  *
@@ -147,20 +147,20 @@ function kw_aliases_remove($type, $alias) {
  * @return
  *   The loaded item, or if not found FALSE.
  */
-function kw_aliases_load($type, $alias) {
+function kw_itemnames_load($type, $alias) {
   // make sure all our helper functions exist
-  module_load_include('inc', 'kw_aliases');
+  module_load_include('inc', 'kw_itemnames');
 
-  if (!($item_id = kw_aliases_alias_get_item_id($type, $alias))) {
+  if (!($item_id = kw_itemnames_alias_get_item_id($type, $alias))) {
     return FALSE;
   }
   
-  return kw_aliases_item_load($type, $item_id);
+  return kw_itemnames_item_load($type, $item_id);
 }
 
-function kw_aliases_item_id($type, $alias) {
+function kw_itemnames_item_id($type, $alias) {
   // make sure all our helper functions exist
-  module_load_include('inc', 'kw_aliases');
+  module_load_include('inc', 'kw_itemnames');
 
-  return kw_aliases_alias_get_item_id($type, $alias);
+  return kw_itemnames_alias_get_item_id($type, $alias);
 }

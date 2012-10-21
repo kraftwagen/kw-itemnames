@@ -3,16 +3,16 @@
 /**
  * Implements hook_entity_info_alter().
  */
-function kw_aliases_entity_entity_info_alter(&$info) {
-  $disabled_types = kw_aliases_entity_disabled_entity_types();
+function kw_itemnames_entity_entity_info_alter(&$info) {
+  $disabled_types = kw_itemnames_entity_disabled_entity_types();
   foreach ($disabled_types as $type) {
     if (isset($info[$type])) {
-      $info[$type]['kw_aliases_entity_disabled'] = true;
+      $info[$type]['kw_itemnames_entity_disabled'] = true;
     }
   }
 }
 
-function kw_aliases_entity_disabled_entity_types() {
+function kw_itemnames_entity_disabled_entity_types() {
   $types = &drupal_static(__FUNCTION__);
 
   if (!isset($types)) {
@@ -24,9 +24,9 @@ function kw_aliases_entity_disabled_entity_types() {
 }
 
 /**
- * Implements hook_kw_aliases_entity_disabled_entity_types() for the system
+ * Implements hook_kw_itemnames_entity_disabled_entity_types() for the system
  * module.
  */
-function system_kw_aliases_entity_disabled_entity_types() {
+function system_kw_itemnames_entity_disabled_entity_types() {
   return array('file');
 }
