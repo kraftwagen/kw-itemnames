@@ -1,5 +1,5 @@
 name = Kraftwagen Itemnames Entity
-description = Provides Kraftwagen Aliases item types for entities
+description = Provides Kraftwagen Itemnames item types for entities
 package = Kraftwagen
 
 core = 7.x

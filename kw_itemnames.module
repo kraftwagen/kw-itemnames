@@ -10,13 +10,13 @@ function kw_itemnames_hook_info() {
 }
 
 /**
- * Load the information about how to handle aliasable types.
+ * Load the information about how to handle nameable types.
  *
  * @param $type
  *   Optional type for which the information should be loaded.
  * 
  * @return
- *   The information about handling aliasable types. If $type is not given, this
+ *   The information about handling nameable types. If $type is not given, this
  *   will be an associative array, with types as keys and the information per 
  *   type as values. If $type is given, the value for that type is returned, 
  *   which is also an associative array.
@@ -58,15 +58,15 @@ function kw_itemnames_type_info($type = NULL) {
 }
 
 /**
- * Ensure that an item exists with a certain alias. 
+ * Ensure that an item exists with a certain name. 
  * 
  * @param $type
- *   The type of alias that should be ensured.
- * @param $alias
- *   The alias that the item should have. This alias has no other use than 
+ *   The type of name that should be ensured.
+ * @param $name
+ *   The name that the item should have. This name has no other use than 
  *   uniquely identifying the item. Therefore you should make sure that the
- *   alias is used only once per type in your project. A good strategy is to
- *   prefix all the aliases you use with your module name.
+ *   name is used only once per type in your project. A good strategy is to
+ *   prefix all the names you use with your module name.
  * @param $required
  *   The properties of the item that are required. If the item already 
  *   exists, it will be updated to have these properties set correctly. 
@@ -78,19 +78,19 @@ function kw_itemnames_type_info($type = NULL) {
  *   The item, after optionally updating it. This function can return FALSE, if
  *   deletion prevention is switched off!
  */
-function kw_itemnames_ensure($type, $alias, $required = NULL, $defaults = NULL) {
+function kw_itemnames_ensure($type, $name, $required = NULL, $defaults = NULL) {
   // make sure all our helper functions exist
   module_load_include('inc', 'kw_itemnames');
 
   // check if we have an item id registered
-  if ($item_id = kw_itemnames_alias_get_item_id($type, $alias)) {
+  if ($item_id = kw_itemnames_name_get_item_id($type, $name)) {
     // try to load the item
     $item = kw_itemnames_item_load($type, $item_id);
     if ($item) {
       // update the item we loaded, using the required properties
       $item = kw_itemnames_item_update($type, $item, $required);
-      // make sure the alias points to the new item
-      kw_itemnames_alias_update($type, $alias, $item);
+      // make sure the name points to the new item
+      kw_itemnames_name_update($type, $name, $item);
 
       return $item;
     }
@@ -98,29 +98,29 @@ function kw_itemnames_ensure($type, $alias, $required = NULL, $defaults = NULL) 
 
   // create the item, using the required and default properties
   $item = kw_itemnames_item_create($type, $required, $defaults);
-  // make sure the alias points to the new item
-  kw_itemnames_alias_update($type, $alias, $item);
+  // make sure the name points to the new item
+  kw_itemnames_name_update($type, $name, $item);
 
   return $item;
 }
 
 /**
- * Ensure that no item exists with a certain alias.
+ * Ensure that no item exists with a certain name.
  * 
  * @param $type
- *   The type of alias that should be removed.
- * @param $alias
- *   The alias that the item has/had.
+ *   The type of name that should be removed.
+ * @param $name
+ *   The name that the item has/had.
  * 
  * @return
  *   TRUE on success, FALSE on failure. Also TRUE if the item is already gone.
  */
-function kw_itemnames_remove($type, $alias) {
+function kw_itemnames_remove($type, $name) {
   // make sure all our helper functions exist
   module_load_include('inc', 'kw_itemnames');
 
-  if ($item_id = kw_itemnames_alias_get_item_id($type, $alias)) {
-    kw_itemnames_alias_delete($type, $alias);
+  if ($item_id = kw_itemnames_name_get_item_id($type, $name)) {
+    kw_itemnames_name_delete($type, $name);
 
     $item = kw_itemnames_item_load($type, $item_id);
     if ($item) {
@@ -132,7 +132,7 @@ function kw_itemnames_remove($type, $alias) {
 }
 
 /**
- * Load an aliased item. 
+ * Load an named item. 
  *
  * Never assume in the code that uses this function that a valid item will be
  * returned. Not even the item was ensured (using kw_itemnames_ensure) with
@@ -140,27 +140,27 @@ function kw_itemnames_remove($type, $alias) {
  * should not break miserably when the item can't be found.
  *
  * @param $type
- *   The type of alias to load
- * @param $alias
- *   The alias to load
+ *   The type of name to load
+ * @param $name
+ *   The name to load
 
  * @return
  *   The loaded item, or if not found FALSE.
  */
-function kw_itemnames_load($type, $alias) {
+function kw_itemnames_load($type, $name) {
   // make sure all our helper functions exist
   module_load_include('inc', 'kw_itemnames');
 
-  if (!($item_id = kw_itemnames_alias_get_item_id($type, $alias))) {
+  if (!($item_id = kw_itemnames_name_get_item_id($type, $name))) {
     return FALSE;
   }
   
   return kw_itemnames_item_load($type, $item_id);
 }
 
-function kw_itemnames_item_id($type, $alias) {
+function kw_itemnames_item_id($type, $name) {
   // make sure all our helper functions exist
   module_load_include('inc', 'kw_itemnames');
 
-  return kw_itemnames_alias_get_item_id($type, $alias);
+  return kw_itemnames_name_get_item_id($type, $name);
 }

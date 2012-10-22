@@ -18,7 +18,7 @@ relation.
   module depends on the [Entity API](http://drupal.org/project/entity) for the 
   CRUD operations on entities.
 * **kw_itemnames_deletion_prevention** (To be added) Implements logic to prevent
-  deletion of aliased items of supported types. There will at least be support
+  deletion of named items of supported types. There will at least be support
   for _nodes_.
 
 ## Usage

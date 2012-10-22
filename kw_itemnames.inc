@@ -18,7 +18,7 @@ function kw_itemnames_item_load($type, $item_id) {
 }
 
 /**
- * Create an aliasable item.
+ * Create an nameable item.
 
  * @param $type
  *   The type of item that should be created.
@@ -38,7 +38,7 @@ function kw_itemnames_item_create($type, $defaults = array(), $required = array(
 }
 
 /**
- * Update an aliased item.
+ * Update an named item.
 
  * @param $type
  *   The type of item that should be updated.
@@ -58,7 +58,7 @@ function kw_itemnames_item_update($type, $item, $required = array()) {
 }
 
 /**
- * Deleted an aliased item.
+ * Deleted an named item.
  *
  * @param $type
  *   The type of item that should be deleted.
@@ -77,7 +77,7 @@ function kw_itemnames_item_delete($type, $item_id) {
 }
 
 /**
- * Get the ID of an aliased item.
+ * Get the ID of an named item.
  *
  * @param $type
  *   The type of item of which the ID should be returned.
@@ -94,63 +94,63 @@ function kw_itemnames_item_get_item_id($type, $item) {
 }
 
 /**
- * Change an alias to point to an item
+ * Change an name to point to an item
  *
  * @param $type
- *   The type of item to which the alias should point.
- * @param $alias
- *   The alias that should point to the item.
+ *   The type of item to which the name should point.
+ * @param $name
+ *   The name that should point to the item.
  * @param $item
- *   The item to which the alias should point.
+ *   The item to which the name name point.
  *
  * @return
  *   TRUE if successfull. FALSE on error.
  */
-function kw_itemnames_alias_update($type, $alias, $item) {
+function kw_itemnames_name_update($type, $name, $item) {
   if (!($item_id = kw_itemnames_item_get_item_id($type, $item))) {
     return FALSE;
   }
-  return kw_itemnames_alias_set_item_id($type, $alias, $item_id);
+  return kw_itemnames_name_set_item_id($type, $name, $item_id);
 }
 
 /**
- * Get the id of an aliased item.
+ * Get the id of an named item.
  *
  * @param $type
- *   The type of alias to get.
- * @param $alias
- *   The alias to set
+ *   The type of name to get.
+ * @param $name
+ *   The name to set
  *
  * @return
  *   The id of the item, or if not found FALSE.
  */
-function kw_itemnames_alias_get_item_id($type, $alias) {
-  if (isset($type) && isset($alias)) {
-    return kw_itemnames_mapping($type, $alias);
+function kw_itemnames_name_get_item_id($type, $name) {
+  if (isset($type) && isset($name)) {
+    return kw_itemnames_mapping($type, $name);
   }
   return FALSE;
 }
 
 /**
- * Set the id of an aliased item.
+ * Set the id of an named item.
  *
  * @param $type
- *   The type of alias to set.
- * @param $alias
- *   The alias to set
+ *   The type of name to set.
+ * @param $name
+ *   The name to set
  * @param $item_id
  *   The id to set
  */
-function kw_itemnames_alias_set_item_id($type, $alias, $item_id = null) {
+function kw_itemnames_name_set_item_id($type, $name, $item_id = null) {
   db_merge('kw_itemnames')
-    ->key(array('type' => $type, 'alias' => $alias))
+    ->key(array('type' => $type, 'name' => $name))
     ->fields(array('item_id' => $item_id))
     ->execute();
-  kw_itemnames_mapping(null, null, true); // drops and rebuilds the alias cache
+  kw_itemnames_mapping(null, null, true); // drops and rebuilds the name cache
   return TRUE;
 }
 
-function kw_itemnames_mapping($type = null, $alias = null, $reset = false) {
+function kw_itemnames_mapping($type = null, $name = null, $reset = false) {
   $mapping = &drupal_static('kw_itemnames');
 
   if ($reset) {
@@ -166,20 +166,20 @@ function kw_itemnames_mapping($type = null, $alias = null, $reset = false) {
   if (!isset($mapping)) {
     $mapping = array();
     $result = db_select('kw_itemnames', 'ka')
-      ->fields('ka', array('item_id', 'type', 'alias'))
+      ->fields('ka', array('item_id', 'type', 'name'))
       ->execute();
     foreach ($result as $row) {
       if (!array_key_exists($row->type, $mapping)) {
         $mapping[$row->type] = array();
       }
-      $mapping[$row->type][$row->alias] = $row->item_id;
+      $mapping[$row->type][$row->name] = $row->item_id;
     }
 
     cache_set('kw_itemnames', $mapping);
   }
 
-  if (isset($type) && isset($alias)) {
-    return isset($mapping[$type][$alias]) ? $mapping[$type][$alias] : FALSE;
+  if (isset($type) && isset($name)) {
+    return isset($mapping[$type][$name]) ? $mapping[$type][$name] : FALSE;
   }
   if (isset($type)) {
     return isset($mapping[$type]) ? $mapping[$type] : FALSE;
@@ -187,20 +187,20 @@ function kw_itemnames_mapping($type = null, $alias = null, $reset = false) {
   return $mapping;
 }
 
-function kw_itemnames_alias_delete($type, $alias) {
+function kw_itemnames_name_delete($type, $name) {
   db_delete('kw_itemnames')
     ->condition('type', $type)
-    ->condition('alias', $alias)
+    ->condition('name', $name)
     ->execute();
-  kw_itemnames_mapping(null, null, true); // drops and rebuilds the alias cache
+  kw_itemnames_mapping(null, null, true); // drops and rebuilds the name cache
   return TRUE;
 }
 
 /**
- * Call a callback for an alias type.
+ * Call a callback for an name type.
  *
  * @param $type
- *   The alias type.
+ *   The name type.
  * @param $callback_type
  *   The calback that should be executed.
  * @param $args
