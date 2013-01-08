@@ -70,7 +70,7 @@ function kw_itemnames_entity_item_delete($entity_type, $entity_id) {
 }
 
 function kw_itemnames_entity_item_extract_id($entity_type, $entity) {
-  list(,$entity_id,) = entity_extract_ids($entity_type, $entity);
+  list($entity_id,,) = entity_extract_ids($entity_type, $entity);
   return $entity_id;
 }
 
