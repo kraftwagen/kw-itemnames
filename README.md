@@ -43,7 +43,7 @@ kw_itemnames_ensure(
   ),
   array(
     'type' => 'page', 
-    'language' => LANGUAGE_NONE
+    'language' => LANGUAGE_NONE,
     'body' => array(
       LANGUAGE_NONE => array(array(
         'value' => '<p>Welcome to my site!</p>',
