@@ -164,3 +164,9 @@ function kw_itemnames_item_id($type, $name) {
 
   return kw_itemnames_name_get_item_id($type, $name);
 }
+function kw_itemnames_name($type, $item) {
+  // make sure all our helper functions exist
+  module_load_include('inc', 'kw_itemnames');
+
+  return is_numeric($item) ? kw_itemnames_item_id_get_name($type, $item) : kw_itemnames_item_get_name($type, $item);
+}

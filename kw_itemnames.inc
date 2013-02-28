@@ -126,7 +126,47 @@ function kw_itemnames_name_update($type, $name, $item) {
  */
 function kw_itemnames_name_get_item_id($type, $name) {
   if (isset($type) && isset($name)) {
-    return kw_itemnames_mapping($type, $name);
+    return kw_itemnames_get_mapping_by_name($type, $name);
+  }
+  return FALSE;
+}
+
+/**
+ * Get the name of an named item.
+ *
+ * @param $type
+ *   The type of name to get.
+ * @param $item_id
+ *   The item_id to get
+ *
+ * @return
+ *   The name of the item, or if not found FALSE.
+ */
+function kw_itemnames_item_id_get_name($type, $item_id) {
+  if (isset($type) && isset($item_id)) {
+    return kw_itemnames_get_mapping_by_item_id($type, $item_id);
+  }
+  return FALSE;
+}
+
+/**
+ * Get the name of an named item.
+ *
+ * @param $type
+ *   The type of name to get.
+ * @param $item
+ *   The item to get
+ *
+ * @return
+ *   The name of the item, or if not found FALSE.
+ */
+function kw_itemnames_item_get_name($type, $item) {
+  if (isset($type) && isset($item)) {
+    if (!($item_id = kw_itemnames_item_get_item_id($type, $item))) {
+      return FALSE;
+    }
+
+    return kw_itemnames_get_mapping_by_item_id($type, $item_id);
   }
   return FALSE;
 }
@@ -146,11 +186,11 @@ function kw_itemnames_name_set_item_id($type, $name, $item_id = null) {
     ->key(array('type' => $type, 'name' => $name))
     ->fields(array('item_id' => $item_id))
     ->execute();
-  kw_itemnames_mapping(null, null, true); // drops and rebuilds the name cache
+  kw_itemnames_mapping(null, true); // drops and rebuilds the name cache
   return TRUE;
 }
 
-function kw_itemnames_mapping($type = null, $name = null, $reset = false) {
+function kw_itemnames_mapping($direction = 'name', $reset = false) {
   $mapping = &drupal_static('kw_itemnames');
 
   if ($reset) {
@@ -164,26 +204,53 @@ function kw_itemnames_mapping($type = null, $name = null, $reset = false) {
   }
 
   if (!isset($mapping)) {
-    $mapping = array();
+    $mapping = array('name' => array(), 'item_id' => array());
     $result = db_select('kw_itemnames', 'ka')
       ->fields('ka', array('item_id', 'type', 'name'))
       ->execute();
     foreach ($result as $row) {
-      if (!array_key_exists($row->type, $mapping)) {
-        $mapping[$row->type] = array();
+      if (!array_key_exists($row->type, $mapping['name'])) {
+        $mapping['name'][$row->type] = array();
       }
-      $mapping[$row->type][$row->name] = $row->item_id;
+      if (!array_key_exists($row->type, $mapping['item_id'])) {
+        $mapping['item_id'][$row->type] = array();
+      }
+      $mapping['name'][$row->type][$row->name] = $row->item_id;
+      $mapping['item_id'][$row->type][$row->item_id] = $row->name;
     }
 
     cache_set('kw_itemnames', $mapping);
   }
 
-  if (isset($type) && isset($name)) {
-    return isset($mapping[$type][$name]) ? $mapping[$type][$name] : FALSE;
+  return isset($mapping[$direction]) ? $mapping[$direction] : FALSE;
+}
+
+function kw_itemnames_get_mapping_by_name($type = null, $name = null) {
+  return _kw_itemnames_get_mapping('name', $type, $name);
+}
+
+function kw_itemnames_get_mapping_by_item_id($type = null, $item_id = null) {
+  return _kw_itemnames_get_mapping('item_id', $type, $item_id);
+}
+
+function _kw_itemnames_get_mapping($direction, $type, $value) {
+  $mapping = kw_itemnames_mapping($direction);
+  if ($mapping === FALSE) {
+    return FALSE;
   }
+
   if (isset($type)) {
-    return isset($mapping[$type]) ? $mapping[$type] : FALSE;
+    if (!isset($mapping[$type])) {
+      return FALSE;
+    }
+
+    if (isset($value)) {
+      return isset($mapping[$type][$value]) ? $mapping[$type][$value] : FALSE;
+    }
+
+    return $mapping[$type];
   }
+
   return $mapping;
 }
 
@@ -192,7 +259,7 @@ function kw_itemnames_name_delete($type, $name) {
     ->condition('type', $type)
     ->condition('name', $name)
     ->execute();
-  kw_itemnames_mapping(null, null, true); // drops and rebuilds the name cache
+  kw_itemnames_mapping(null, true); // drops and rebuilds the name cache
   return TRUE;
 }
 
