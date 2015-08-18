@@ -51,7 +51,6 @@ function kw_itemnames_paragraphs_item_create($defaults, $required) {
 
   $start_array['field_name'] = $field_name;
 
-
   $entity = entity_create('paragraphs_item', $start_array);
   foreach ($entity_array as $key => $value) {
     if (in_array($key, $ignore)) {
@@ -61,7 +60,6 @@ function kw_itemnames_paragraphs_item_create($defaults, $required) {
   }
 
   $entity->setHostEntity($hostEntityType, $hostEntity);
-
 
   $entity->save(TRUE);
 
@@ -91,4 +89,3 @@ function kw_itemnames_paragraphs_item_extract_id($entity) {
   list($entity_id, ,) = entity_extract_ids('paragraphs_item', $entity);
   return $entity_id;
 }
-
