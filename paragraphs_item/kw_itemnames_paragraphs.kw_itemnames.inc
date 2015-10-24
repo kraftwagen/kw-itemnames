@@ -9,18 +9,16 @@ function kw_itemnames_paragraphs_kw_itemnames_type_info() {
   $result['paragraphs_item'] = array(
     'item load callback' => 'kw_itemnames_paragraphs_item_load',
     'item load arguments' => array('%item_id'),
+
     'item create callback' => 'kw_itemnames_paragraphs_item_create',
-    'item create arguments' => array(
-      '%defaults',
-      '%required',
-    ),
+    'item create arguments' => array('%defaults', '%required'),
+
     'item update callback' => 'kw_itemnames_paragraphs_item_update',
-    'item update arguments' => array(
-      '%item',
-      '%required',
-    ),
+    'item update arguments' => array('%item', '%required'),
+
     'item delete callback' => 'kw_itemnames_paragraphs_item_delete',
     'item delete arguments' => array('%item_id'),
+
     'item extract id callback' => 'kw_itemnames_paragraphs_item_extract_id',
     'item extract id arguments' => array('%item'),
   );
@@ -88,4 +86,12 @@ function kw_itemnames_paragraphs_item_delete($entity_id) {
 function kw_itemnames_paragraphs_item_extract_id($entity) {
   list($entity_id, ,) = entity_extract_ids('paragraphs_item', $entity);
   return $entity_id;
+}
+
+/**
+ * Implements hook_kw_itemnames_entity_disabled_entity_types() for the system
+ * module.
+ */
+function kw_itemnames_paragraphs_kw_itemnames_entity_disabled_entity_types() {
+  return array('paragraphs_item');
 }
