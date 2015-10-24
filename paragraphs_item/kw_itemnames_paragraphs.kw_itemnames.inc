@@ -87,11 +87,3 @@ function kw_itemnames_paragraphs_item_extract_id($entity) {
   list($entity_id, ,) = entity_extract_ids('paragraphs_item', $entity);
   return $entity_id;
 }
-
-/**
- * Implements hook_kw_itemnames_entity_disabled_entity_types() for the system
- * module.
- */
-function kw_itemnames_paragraphs_kw_itemnames_entity_disabled_entity_types() {
-  return array('paragraphs_item');
-}
